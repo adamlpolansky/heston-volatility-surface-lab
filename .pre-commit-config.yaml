@@ -1,0 +1,36 @@
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: Ruff check
+        entry: python -m ruff check .
+        language: python
+        additional_dependencies: ["ruff==0.15.20"]
+        pass_filenames: false
+      - id: ruff-format
+        name: Ruff format check
+        entry: python -m ruff format --check .
+        language: python
+        additional_dependencies: ["ruff==0.15.20"]
+        pass_filenames: false
+      - id: mypy
+        name: Mypy
+        entry: python -m mypy src
+        language: python
+        additional_dependencies:
+          - "mypy==2.1.0"
+          - "numpy==2.5.0"
+          - "pandas==3.0.3"
+          - "pydantic==2.13.4"
+          - "scipy==1.18.0"
+        pass_filenames: false
+      - id: publication-guard
+        name: Publication guard
+        entry: python scripts/publication_guard.py
+        language: python
+        pass_filenames: false
+      - id: markdown-links
+        name: Markdown links
+        entry: python scripts/check_markdown_links.py
+        language: python
+        pass_filenames: false

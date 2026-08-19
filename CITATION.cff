@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using these metadata."
+title: "Heston & SSVI Volatility Surface Lab"
+type: software
+authors:
+  - given-names: "Adam Luboš"
+    family-names: "Polanský"
+repository-code: "https://github.com/adamlpolansky/heston-volatility-surface-lab"
+license: MIT
+version: 1.0.0
+date-released: 2026-08-20
