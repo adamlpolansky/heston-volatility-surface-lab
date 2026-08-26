@@ -25,10 +25,10 @@
     "optimizer_completed": true,
     "params": {
       "kappa": 1.6,
-      "rho": 0.005897,
+      "rho": 0.0059,
       "sigma": 0.5,
       "theta": 0.045,
-      "v0": 0.053222
+      "v0": 0.0532
     },
     "price_rmse": 0.245983,
     "role": "structural_diagnostic_not_signal"

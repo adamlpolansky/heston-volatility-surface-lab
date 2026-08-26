@@ -244,7 +244,7 @@ def _calibrate_heston(surface: pd.DataFrame) -> tuple[dict[str, Any], HestonPara
             "calibration_points": len(calibration_market),
             "objective": result.objective,
             "price_rmse": _round(price_rmse, 6),
-            "params": {key: _round(value, 6) for key, value in result.params.items()},
+            "params": {key: _round(value, 4) for key, value in result.params.items()},
             "fixed_parameters": ["theta", "kappa", "sigma"],
             "optimizer_completed": bool(math.isfinite(result.loss)),
         },
