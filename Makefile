@@ -1,4 +1,4 @@
-.PHONY: install install-providers lint format format-check typecheck test guard links build check demo
+.PHONY: install install-providers lint format format-check typecheck test guard links build check demo evidence
 
 install:
 	python -m pip install -c constraints/py312.txt -e ".[dev]"
@@ -33,4 +33,7 @@ build:
 demo:
 	python -m heston_arb_lab.cli demo
 
-check: lint format-check typecheck test guard links demo
+evidence:
+	python -m heston_arb_lab.cli synthetic-evidence
+
+check: lint format-check typecheck test guard links evidence demo

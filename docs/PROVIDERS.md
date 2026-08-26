@@ -1,17 +1,13 @@
-# Provider integration
+# Optional provider boundary
 
-ThetaData support is an optional adapter for users who independently possess authorized
-credentials and data rights. The adapter wraps documented Python-library method names behind a
-narrow boundary and defaults to `dry_run=True`.
+The public project neither requires nor exercises a market-data provider. ThetaData support is
+retained only as an optional code interface and defaults to `dry_run=True`. It contains no
+credential, response cache or embedded provider output.
 
-Live access requires all of the following:
+While licensing permission is unresolved, the public demo and CI must not instantiate a live
+client, perform a provider request or publish any provider-derived artifact. The default
+installation therefore excludes the provider extra.
 
-1. install the `providers` extra;
-2. place `THETADATA_API_KEY` only in the process environment or an external secret manager;
-3. instantiate `ThetaDataAdapter(dry_run=False)` explicitly;
-4. choose an output location under a Git-ignored local directory;
-5. confirm that the intended access, storage, and use comply with provider terms.
-
-The adapter never logs a credential. CI does not set provider credentials, perform live
-requests, or download market data. Provider-derived files are outside the public contract and
-must not be committed or redistributed.
+Possession of this source code grants no provider access or data rights. Any future activation
+would require separate written authorization, a licensing review and a publication-boundary
+review. See the [public-data policy](PUBLIC_DATA_POLICY.md).

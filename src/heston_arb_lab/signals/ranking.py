@@ -8,10 +8,13 @@ from typing import Any
 
 import pandas as pd
 
+from heston_arb_lab.backtest.execution import validate_trade_side
+
 
 def estimate_leg_cost(leg: dict[str, Any], fee_per_contract: float = 0.65) -> float:
     """Estimate conservative transaction cost for a signal leg."""
 
+    validate_trade_side(leg.get("side"))
     bid = float(leg.get("bid", leg.get("mid", 0.0)))
     ask = float(leg.get("ask", leg.get("mid", bid)))
     quantity = abs(float(leg.get("quantity", 1.0)))
@@ -30,6 +33,8 @@ def score_signal(
 
     enriched = signal.copy()
     legs = list(enriched.get("legs", []))
+    for leg in legs:
+        validate_trade_side(leg.get("side"))
     estimated_cost = float(enriched.get("estimated_cost", 0.0)) or sum(
         estimate_leg_cost(leg, fee_per_contract) for leg in legs
     )

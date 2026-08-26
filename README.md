@@ -1,96 +1,98 @@
 # Heston & SSVI Volatility Surface Lab
 
+End-to-end options-surface research framework covering quote validation, option-implied
+forwards, IV inference, SSVI smoothing, Heston calibration and execution-aware arbitrage
+diagnostics.
+
+![SYNTHETIC evidence: fitted SSVI surface and pipeline diagnostics](docs/assets/synthetic_evidence.svg)
+
+```bash
+python -m heston_arb_lab.cli synthetic-evidence
+```
+
+| Deterministic result (seed `20260826`) | SYNTHETIC evidence |
+|---|---:|
+| Generated / clean quote rows | 77 / 72 |
+| Deliberately invalid rows rejected | 5 / 5 |
+| Parity-implied forwards | 4 expiries; 0.000000 bps max error |
+| Robust IV inversions | 72 / 72; 0.00005146 RMSE |
+| Primary SSVI surface recovery | 0.00010862 IV RMSE; 0 condition failures |
+| Heston structural calibration | 12 points; 0.245983 price RMSE |
+| Fitted-price static-arbitrage flags | 0 |
+| Residual candidates rejected by execution gates | 8 / 8; 0 accepted |
+
+> **SYNTHETIC ONLY. No market-data evidence, provider-derived output, empirical performance,
+> mispricing, profitability or executable-trading claim is included.**
+
 [![CI](https://github.com/adamlpolansky/heston-volatility-surface-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/adamlpolansky/heston-volatility-surface-lab/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-blue.svg)](pyproject.toml)
 
-An implementation-only Python toolkit for quote validation, volatility-surface construction,
-Heston and SSVI calibration, and execution-aware static-arbitrage diagnostics.
+## What this demonstrates
 
-This repository contains the implementation only. It provides optional adapters for
-user-authorized ThetaData access and a pipeline for quote cleaning, volatility-surface
-construction, Heston and SSVI calibration, and execution-aware static-arbitrage diagnostics.
-No market data, credentials, calibrated parameters, candidate sets, backtests, reports, or
-empirical results are distributed. All provider-backed artifacts remain local and Git-ignored.
-The repository makes no claim that an executable arbitrage opportunity exists.
+The fixed-seed evidence pack runs one synthetic chain through the complete publication path:
 
-## Features
+1. strict row-schema validation and quote-quality rejection;
+2. forward inference from matched calls and puts using put-call parity;
+3. bounded Black–Scholes implied-volatility inversion;
+4. SSVI fitting and recovery against known synthetic surface parameters;
+5. reduced Heston calibration as a structural diagnostic;
+6. strike, vertical-spread and butterfly checks on fitted prices;
+7. model-residual-to-bid/ask-spread measurement; and
+8. fees, spread cost and cost-buffer rejection gates.
 
-- Typed option-quote schemas, normalization, liquidity filters, and timestamp alignment.
-- Black–Scholes pricing, Greeks, implied-volatility inversion, and numerical checks.
-- Heston characteristic-function pricing and bounded calibration objectives.
-- SVI/SSVI total-variance parameterization, fitting, and surface diagnostics.
-- Put–call parity, vertical, butterfly, and calendar necessary-condition checks.
-- Bid/ask-, cost-, liquidity-, and execution-aware candidate rejection and ranking.
-- Generic backtesting components and an optional, mock-tested ThetaData adapter.
+SSVI is the **primary surface smoother and baseline**. Heston is an independently specified
+**structural diagnostic model**. Neither model is an automatic trading signal.
 
-## Architecture
+The generator uses four maturities, nine strikes, both option rights, controlled fixed-seed
+midpoint noise and observable bid/ask spreads. It appends five deliberately invalid rows: a
+crossed market, a negative bid, a missing ask, an unknown option right and a negative strike.
+Only aggregate evidence is committed; quote rows are never written.
 
-```mermaid
-flowchart LR
-    A[Runtime-generated artificial quotes] --> C[Validation and cleaning]
-    B[Optional authorized local provider] -->|local ignored storage| C
-    C --> D[Implied volatility and forward inference]
-    D --> E[SSVI and Heston surfaces]
-    E --> F[Static-arbitrage diagnostics]
-    F --> G[Execution-aware rejection and ranking]
-    G --> H[User-controlled local analysis]
-```
+## Three different claims
 
-Provider access is optional. CI, tests, and the default demo follow only the artificial-input
-path and do not contact a market-data service.
+- A **model-relative residual** is the difference between a quote midpoint and a fitted-model
+  price. It can be ordinary model error and is not an arbitrage statement.
+- A **static-arbitrage flag** is a failed mathematical price constraint under the diagnostic's
+  assumptions. It remains a screening result, not proof of a fillable trade.
+- An **executable opportunity** would additionally survive contemporaneous bid/ask prices,
+  realistic fills, fees, slippage, financing, borrow, exercise, latency and operational risk.
+  This repository reports none.
 
-## Offline quickstart
+## Reproduce offline
 
-Use Python 3.12:
+Use Python 3.12. The default installation excludes all provider clients.
 
 ```bash
 python -m venv .venv
 python -m pip install -c constraints/py312.txt -e ".[dev]"
 python -m pip check
+python -m heston_arb_lab.cli synthetic-evidence
 python -m pytest -q
-python -m heston_arb_lab.cli demo
+python -m ruff check .
+python -m ruff format --check .
+python -m mypy src
 ```
 
-Tests construct artificial option chains and surfaces in memory or temporary directories at
-runtime. They do not load committed datasets and leave the tracked worktree unchanged.
+The regeneration command rewrites only the labelled aggregate
+[`synthetic_evidence.json`](docs/assets/synthetic_evidence.json) and
+[`synthetic_evidence.svg`](docs/assets/synthetic_evidence.svg). CI regenerates them and fails
+if bytes differ. The demo, test suite and CI make no provider request and require no credential.
 
-## What the diagnostics mean
+## Public boundary
 
-- A **model-relative discrepancy** is a difference from a fitted model. It is not by itself an
-  arbitrage violation.
-- A **static-arbitrage necessary-condition violation** fails a mathematical price constraint,
-  subject to the input assumptions. It is a screening result, not a guaranteed trade.
-- An **executable trade** would additionally require contemporaneous executable quotes,
-  realistic fills, fees, slippage, financing, borrow, exercise, latency, and operational
-  feasibility. This repository does not claim that such a trade exists.
+No ThetaData or other restricted-provider data is used. No private single-name study, quote
+row, cached response, fitted real-data parameter, metric, plot, table or conclusion is
+published. The optional adapter remains an inert code interface: it is excluded from the
+default dependency set, defaults to dry-run behavior, and is not exercised by the public
+evidence command.
 
-## Optional provider integration
+See the [public-data policy](docs/PUBLIC_DATA_POLICY.md), [methodology](docs/METHODOLOGY.md),
+[limitations](docs/LIMITATIONS.md), [architecture](docs/ARCHITECTURE.md), and
+[reproducibility guide](docs/REPRODUCIBILITY.md).
 
-Install adapters separately:
-
-```bash
-python -m pip install -c constraints/py312.txt -e ".[providers]"
-```
-
-The ThetaData adapter defaults to dry-run behavior. Live use requires the user to set
-`THETADATA_API_KEY` in the process environment, instantiate the adapter with `dry_run=False`,
-and independently confirm authorization and data rights. Provider outputs must be written only
-under ignored local directories such as `work/` or `data/`. Secrets are never printed.
-
-See [provider boundaries](docs/PROVIDERS.md) and
-[third-party notices](THIRD_PARTY_NOTICES.md).
-
-## Documentation
-
-- [Architecture](docs/ARCHITECTURE.md)
-- [Data contracts](docs/DATA_CONTRACTS.md)
-- [CLI and API usage](docs/USAGE.md)
-- [Reproducibility](docs/REPRODUCIBILITY.md)
-- [Limitations and non-claims](docs/LIMITATIONS.md)
-
-## License
+## License and author
 
 Original project content is licensed under the [MIT License](LICENSE), copyright 2026
-Adam Luboš Polanský. Provider services, client libraries, and market data remain subject to
-their respective terms and licences.
+Adam Luboš Polanský. Provider services, client libraries and market data remain subject to
+their respective terms and licences; none of their data is distributed here.

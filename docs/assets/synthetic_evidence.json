@@ -1,0 +1,90 @@
+{
+  "asof": "2040-01-03",
+  "conclusion": "Synthetic pipeline validation passed; no real-market performance or trading conclusion is made.",
+  "execution_gates": {
+    "accepted_as_executable": 0,
+    "cost_buffer_currency_units": 1.0,
+    "interpretation": "Residuals are model-relative; none is an executable-opportunity claim.",
+    "max_absolute_residual_to_full_spread": 0.100772,
+    "model_relative_candidates": 8,
+    "rejected_by_execution_gates": 8
+  },
+  "forward_inference": {
+    "expiries_inferred": 4,
+    "max_absolute_error_bps": 0.0,
+    "method": "put_call_parity_median"
+  },
+  "heston_structural_diagnostic": {
+    "calibration_points": 12,
+    "fixed_parameters": [
+      "theta",
+      "kappa",
+      "sigma"
+    ],
+    "objective": "price_rmse",
+    "optimizer_completed": true,
+    "params": {
+      "kappa": 1.6,
+      "rho": 0.005897,
+      "sigma": 0.5,
+      "theta": 0.045,
+      "v0": 0.053222
+    },
+    "price_rmse": 0.245983,
+    "role": "structural_diagnostic_not_signal"
+  },
+  "iv_inversion": {
+    "all_clean_quotes_inverted": true,
+    "rmse_volatility_points": 5.146e-05
+  },
+  "label": "SYNTHETIC \u2014 NO MARKET DATA OR TRADING CLAIM",
+  "network_requests": 0,
+  "pipeline": {
+    "clean_quote_rows": 72,
+    "deliberately_invalid_rows": 5,
+    "generated_quote_rows": 77,
+    "iv_inversions": 72,
+    "maturities": 4,
+    "quality_rejected_rows": 1,
+    "schema_rejected_rows": 4,
+    "strikes": 9
+  },
+  "price_space_static_arbitrage": {
+    "checks": [
+      "strike_monotonicity",
+      "vertical_bounds",
+      "butterfly_convexity"
+    ],
+    "scope": "fitted_ssvi_prices",
+    "violations": 0
+  },
+  "provider_data_rows": 0,
+  "seed": 20260826,
+  "ssvi_primary_surface": {
+    "recovered_params": {
+      "eta": 0.999991,
+      "gamma": 0.499963,
+      "rho": 5e-06,
+      "theta_by_expiry": {
+        "2040-02-02": 0.00310669,
+        "2040-03-03": 0.00659346,
+        "2040-05-02": 0.01439548,
+        "2040-08-30": 0.03199617
+      }
+    },
+    "role": "primary_smoother_and_baseline",
+    "sufficient_condition_failures": 0,
+    "surface_iv_rmse_volatility_points": 0.00010862,
+    "true_params": {
+      "eta": 1.0,
+      "gamma": 0.5,
+      "rho": 0.0,
+      "theta_by_expiry": {
+        "2040-02-02": 0.0031,
+        "2040-03-03": 0.0066,
+        "2040-05-02": 0.0144,
+        "2040-08-30": 0.032
+      }
+    }
+  }
+}

@@ -5,8 +5,9 @@ The tested environment is Python 3.12 with versions constrained by
 in GitHub Actions.
 
 ```bash
-python -m pip install -c constraints/py312.txt -e ".[dev,providers]"
+python -m pip install -c constraints/py312.txt -e ".[dev]"
 python -m pip check
+python -m heston_arb_lab.cli synthetic-evidence
 python -m pytest -q
 python -m ruff check .
 python -m ruff format --check .
@@ -19,5 +20,11 @@ python -m build
 python -m heston_arb_lab.cli demo
 ```
 
-Tests generate artificial values at runtime and use temporary directories for file-system
-behavior. No empirical input, fitted surface, report, or test-output file is versioned.
+The evidence command must reproduce `docs/assets/synthetic_evidence.json` and
+`docs/assets/synthetic_evidence.svg` byte for byte. CI runs it before checking that the tracked
+tree is unchanged. Only aggregate synthetic evidence is versioned; quote rows are generated in
+memory and never written.
+
+Seed, date, generator parameters and Heston structural settings are constants in
+`heston_arb_lab.synthetic_evidence`. No network or credential is used after dependencies are
+installed.

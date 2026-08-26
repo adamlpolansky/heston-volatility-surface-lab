@@ -1,6 +1,12 @@
 # CLI and API usage
 
-Run the network-free demonstration:
+Regenerate the committed, network-free evidence pack:
+
+```bash
+python -m heston_arb_lab.cli synthetic-evidence
+```
+
+Run the same pipeline in memory without writing artifacts:
 
 ```bash
 python -m heston_arb_lab.cli demo
@@ -19,8 +25,9 @@ The Python API exposes numerical modules directly, for example:
 from heston_arb_lab.models.black_scholes import bs_price, implied_volatility
 from heston_arb_lab.models.heston_cf import HestonParams
 from heston_arb_lab.models.ssvi import SSVIParams
-from heston_arb_lab.surface.surface_builder import synthetic_option_chain
+from heston_arb_lab.synthetic_evidence import run_synthetic_evidence
 ```
 
-The artificial-chain helper is intended for examples and tests. Users are responsible for
-validating any locally supplied data before interpreting diagnostics.
+The evidence API returns aggregate results and an in-memory synthetic surface. It does not load
+or persist market data. Users are responsible for validating any separately supplied local data
+before interpreting diagnostics.

@@ -26,11 +26,17 @@ EXACT_FILES = {
     "docs/ARCHITECTURE.md",
     "docs/DATA_CONTRACTS.md",
     "docs/LIMITATIONS.md",
+    "docs/METHODOLOGY.md",
     "docs/PROVIDERS.md",
+    "docs/PUBLIC_DATA_POLICY.md",
     "docs/REPRODUCIBILITY.md",
     "docs/USAGE.md",
     "scripts/check_markdown_links.py",
     "scripts/publication_guard.py",
+}
+SYNTHETIC_ARTIFACTS = {
+    "docs/assets/synthetic_evidence.json",
+    "docs/assets/synthetic_evidence.svg",
 }
 PYTHON_PREFIXES = ("src/heston_arb_lab/", "tests/")
 FORBIDDEN_SUFFIXES = {
@@ -109,33 +115,20 @@ SECRET_PATTERNS = {
 
 
 def _candidate_files() -> list[Path]:
-    tracked = subprocess.run(["git", "ls-files", "-z"], cwd=ROOT, check=False, capture_output=True)
-    if tracked.returncode == 0 and tracked.stdout:
-        return sorted(ROOT / item.decode("utf-8") for item in tracked.stdout.split(b"\0") if item)
-    excluded = {
-        ".git",
-        ".hypothesis",
-        ".mypy_cache",
-        ".pytest_cache",
-        ".ruff_cache",
-        ".venv",
-        "__pycache__",
-        "build",
-        "dist",
-        "work",
-    }
-    return sorted(
-        path
-        for path in ROOT.rglob("*")
-        if path.is_file()
-        and not any(
-            part in excluded or part.endswith(".egg-info") for part in path.relative_to(ROOT).parts
-        )
+    tracked = subprocess.run(
+        ["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
     )
+    if tracked.returncode != 0:
+        detail = tracked.stderr.decode("utf-8", errors="replace").strip()
+        raise SystemExit(f"publication guard could not enumerate Git files: {detail}")
+    return sorted(ROOT / item.decode("utf-8") for item in tracked.stdout.split(b"\0") if item)
 
 
 def _is_allowlisted(relative: str) -> bool:
-    if relative in ROOT_FILES or relative in EXACT_FILES:
+    if relative in ROOT_FILES or relative in EXACT_FILES or relative in SYNTHETIC_ARTIFACTS:
         return True
     return relative.endswith(".py") and relative.startswith(PYTHON_PREFIXES)
 
@@ -176,7 +169,9 @@ def main() -> None:
             failures.append(f"outside allowlist: {relative}")
         if path.is_symlink():
             failures.append(f"symlink: {relative}")
-        if path.suffix.casefold() in FORBIDDEN_SUFFIXES or top_level in FORBIDDEN_PARTS:
+        if (
+            path.suffix.casefold() in FORBIDDEN_SUFFIXES and relative not in SYNTHETIC_ARTIFACTS
+        ) or top_level in FORBIDDEN_PARTS:
             failures.append(f"forbidden path type: {relative}")
         if any(fragment in lower_name for fragment in FORBIDDEN_NAME_FRAGMENTS):
             failures.append(f"internal filename: {relative}")
@@ -193,6 +188,8 @@ def main() -> None:
         except UnicodeDecodeError:
             failures.append(f"non-UTF-8 file: {relative}")
             continue
+        if relative in SYNTHETIC_ARTIFACTS and "SYNTHETIC" not in text:
+            failures.append(f"unlabelled synthetic artifact: {relative}")
         for label, pattern in SECRET_PATTERNS.items():
             if pattern.search(data):
                 failures.append(f"{label}: {relative}")

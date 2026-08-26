@@ -8,7 +8,11 @@ from typing import Any
 import pandas as pd
 
 from heston_arb_lab.backtest.costs import CostConfig, slippage_cost
-from heston_arb_lab.backtest.execution import option_exit_price, option_fill_price
+from heston_arb_lab.backtest.execution import (
+    option_exit_price,
+    option_fill_price,
+    validate_trade_side,
+)
 
 
 def round_trip_option_pnl(
@@ -26,7 +30,7 @@ def round_trip_option_pnl(
     cfg = cost_config or CostConfig()
     entry = option_fill_price(side, entry_bid, entry_ask)
     exit_price = option_exit_price(side, exit_bid, exit_ask)
-    signed = 1.0 if side.lower() == "buy" else -1.0
+    signed = 1.0 if validate_trade_side(side) == "buy" else -1.0
     gross = signed * (exit_price - entry) * quantity * cfg.option_multiplier
     fees = 2.0 * cfg.option_fee_per_contract * abs(quantity)
     slippage = slippage_cost(
@@ -56,7 +60,7 @@ def backtest_static_signals(
         if not legs:
             continue
         leg = legs[0]
-        side = str(leg.get("side", "buy"))
+        side = validate_trade_side(leg.get("side"))
         bid = float(leg.get("bid", leg.get("mid", 0.0)))
         ask = float(leg.get("ask", leg.get("mid", bid)))
         mid = float(leg.get("mid", (bid + ask) / 2.0))

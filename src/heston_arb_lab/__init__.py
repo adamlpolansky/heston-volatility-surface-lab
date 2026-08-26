@@ -1,3 +1,3 @@
-"""Implementation toolkit for volatility surfaces and static-arbitrage diagnostics."""
+"""Offline Heston and SSVI volatility-surface research pipeline."""
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"

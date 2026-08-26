@@ -6,6 +6,7 @@ from heston_arb_lab.backtest.costs import CostConfig
 from heston_arb_lab.backtest.engine import backtest_static_signals, round_trip_option_pnl
 from heston_arb_lab.backtest.execution import option_exit_price, option_fill_price
 from heston_arb_lab.backtest.metrics import compute_metrics
+from heston_arb_lab.signals.ranking import score_signal
 
 
 def test_bid_ask_execution_rules() -> None:
@@ -13,6 +14,23 @@ def test_bid_ask_execution_rules() -> None:
     assert option_fill_price("sell", 1.0, 1.2) == 1.0
     assert option_exit_price("buy", 1.3, 1.5) == 1.3
     assert option_exit_price("sell", 1.3, 1.5) == 1.5
+
+
+@pytest.mark.parametrize("side", ["", "hold", "BUY ", None])
+def test_execution_fails_closed_for_unknown_or_missing_side(side: object) -> None:
+    with pytest.raises(ValueError, match="side"):
+        option_fill_price(side, 1.0, 1.2)  # type: ignore[arg-type]
+
+
+def test_scoring_fails_closed_even_when_cost_is_precomputed() -> None:
+    with pytest.raises(ValueError, match="side"):
+        score_signal(
+            {
+                "gross_edge": 10.0,
+                "estimated_cost": 1.0,
+                "legs": [{"side": "unknown", "bid": 1.0, "ask": 1.1}],
+            }
+        )
 
 
 def test_round_trip_long_and_short_accounting() -> None:

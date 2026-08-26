@@ -4,20 +4,13 @@ from __future__ import annotations
 
 import importlib.util
 import platform
-from datetime import date
+from pathlib import Path
 
 import typer
 
 from heston_arb_lab import __version__
 from heston_arb_lab.config import resolve_thetadata_credentials
-from heston_arb_lab.signals.parity import scan_put_call_parity
-from heston_arb_lab.signals.ranking import rank_signals
-from heston_arb_lab.surface.no_arbitrage import run_no_arbitrage_checks
-from heston_arb_lab.surface.surface_builder import (
-    SurfaceBuildConfig,
-    build_surface,
-    synthetic_option_chain,
-)
+from heston_arb_lab.synthetic_evidence import run_synthetic_evidence, write_synthetic_evidence
 
 app = typer.Typer(
     name="heston-lab",
@@ -54,29 +47,38 @@ def provider_status() -> None:
 
 @app.command()
 def demo() -> None:
-    """Run an in-memory artificial surface and diagnostic smoke test."""
+    """Run the complete synthetic evidence pipeline without writing artifacts."""
 
-    asof = date(2040, 1, 15)
-    quotes = synthetic_option_chain(asof=asof, symbol="SYNTH")
-    surface = build_surface(
-        quotes,
-        SurfaceBuildConfig(spot=100.0, asof=asof, rate=0.04),
+    run = run_synthetic_evidence()
+    typer.echo("label=SYNTHETIC")
+    typer.echo("mode=offline-synthetic")
+    typer.echo(f"clean_quote_rows={run.summary['pipeline']['clean_quote_rows']}")
+    typer.echo(
+        f"price_space_violations={run.summary['price_space_static_arbitrage']['violations']}"
     )
-    violations = run_no_arbitrage_checks(surface, rate=0.04)
-    parity = scan_put_call_parity(
-        surface,
-        spot=100.0,
-        rate=0.04,
-        min_abs_residual=0.002,
+    typer.echo(
+        f"execution_candidates_accepted={run.summary['execution_gates']['accepted_as_executable']}"
     )
-    ranked = rank_signals(parity, min_net_edge=0.0)
-
-    typer.echo("mode=offline-artificial")
-    typer.echo(f"surface_rows={len(surface)}")
-    typer.echo(f"necessary_condition_flags={len(violations)}")
-    typer.echo(f"execution_filtered_candidates={len(ranked)}")
     typer.echo("network_request=none")
     typer.echo("artifacts_written=none")
+
+
+@app.command("synthetic-evidence")
+def synthetic_evidence(
+    output_dir: Path | None = typer.Option(
+        None,
+        help="Output directory; defaults to the committed docs/assets evidence directory.",
+    ),
+) -> None:
+    """Regenerate the labelled aggregate JSON and SVG evidence pack."""
+
+    destination = output_dir or Path(__file__).resolve().parents[2] / "docs" / "assets"
+    run = write_synthetic_evidence(destination)
+    typer.echo("label=SYNTHETIC")
+    typer.echo(f"seed={run.summary['seed']}")
+    typer.echo(f"summary={destination / 'synthetic_evidence.json'}")
+    typer.echo(f"visual={destination / 'synthetic_evidence.svg'}")
+    typer.echo("network_request=none")
 
 
 if __name__ == "__main__":
