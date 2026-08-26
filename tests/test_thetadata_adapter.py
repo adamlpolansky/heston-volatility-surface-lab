@@ -318,6 +318,8 @@ def test_tiny_surface_selector_caps_contracts_and_warns() -> None:
 def test_ingest_quote_ticks_passes_probe_style_parameters_and_writes_non_empty_parquet(
     tmp_path,
 ) -> None:
+    pytest.importorskip("pyarrow", reason="optional provider-storage extra is not in offline CI")
+
     class NonEmptyQuoteClient(RecordingThetaClient):
         def option_history_quote(self, **kwargs: object) -> list[dict[str, object]]:
             self.calls.append(("option_history_quote", kwargs))

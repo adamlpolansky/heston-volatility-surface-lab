@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "heston-volatility-surface-lab"
-version = "1.0.0"
-description = "Implementation-only toolkit for Heston/SSVI surfaces and execution-aware static-arbitrage diagnostics."
+version = "1.1.0"
+description = "Offline Heston and SSVI volatility-surface research and diagnostic pipeline."
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 license = "MIT"

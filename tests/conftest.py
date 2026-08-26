@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import os
+import socket
 from datetime import date
+from typing import Any
 
 import pandas as pd
 import pytest
@@ -10,6 +13,21 @@ from heston_arb_lab.surface.surface_builder import (
     build_surface,
     synthetic_option_chain,
 )
+
+
+@pytest.fixture(autouse=True)
+def block_network_when_offline(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Make the CI offline contract executable rather than documentary."""
+
+    if os.environ.get("HESTON_LAB_OFFLINE") != "1":
+        return
+
+    def denied(*args: Any, **kwargs: Any) -> None:
+        del args, kwargs
+        raise AssertionError("network access is forbidden in offline tests")
+
+    monkeypatch.setattr(socket.socket, "connect", denied)
+    monkeypatch.setattr(socket.socket, "connect_ex", denied)
 
 
 @pytest.fixture()
