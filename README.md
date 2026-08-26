@@ -14,12 +14,17 @@ python -m heston_arb_lab.cli synthetic-evidence
 |---|---:|
 | Generated / clean quote rows | 77 / 72 |
 | Deliberately invalid rows rejected | 5 / 5 |
-| Parity-implied forwards | 4 expiries; 0.000000 bps max error |
+| Parity-implied forwards | 4 expiries; 0.000000 bps max error (expected by construction: the shared call/put midpoint perturbation cancels in `C - P`) |
 | Robust IV inversions | 72 / 72; 0.00005146 RMSE |
 | Primary SSVI surface recovery | 0.00010862 IV RMSE; 0 condition failures |
 | Heston structural calibration | 12 points; 0.245983 price RMSE |
 | Fitted-price static-arbitrage flags | 0 |
 | Residual candidates rejected by execution gates | 8 / 8; 0 accepted |
+
+The `0.000000 bps` forward error is a pipeline invariant: each matched call and put receives
+the same synthetic midpoint perturbation, which cancels exactly in `C - P`. It validates the
+parity-forward implementation; it is not a claim of statistical estimation accuracy on noisy
+market data.
 
 > **SYNTHETIC ONLY. No market-data evidence, provider-derived output, empirical performance,
 > mispricing, profitability or executable-trading claim is included.**

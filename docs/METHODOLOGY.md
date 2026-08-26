@@ -19,7 +19,9 @@ Neither produces an automatic trading signal.
    Quality flags then reject crossed, negative, missing, tiny or excessively wide markets.
 3. **Forward inference.** For each expiry, matched midpoints imply
    `F = K + exp(rT) × (C - P)`. The median across strikes is used rather than the known carry
-   forward; the known value is retained only to measure synthetic recovery error.
+   forward; the known value is retained only to measure synthetic recovery error. Matched calls
+   and puts share the same synthetic midpoint perturbation, so it cancels in `C - P`: zero error
+   is an expected pipeline check, not a noisy-market accuracy estimate.
 4. **IV inversion.** Clean midpoints are inverted with bounded Black–Scholes root finding.
 5. **SSVI fit.** A power-law SSVI surface fits total variance across all maturities. Recovery is
    measured against the generator's known surface, and sufficient calendar/butterfly

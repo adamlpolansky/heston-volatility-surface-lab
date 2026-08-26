@@ -32,7 +32,12 @@ def score_signal(
     """Attach cost, net edge, confidence, and rejection flags."""
 
     enriched = signal.copy()
-    legs = list(enriched.get("legs", []))
+    raw_legs = enriched.get("legs")
+    if raw_legs is None:
+        raise ValueError("signal must include at least one execution leg")
+    legs = list(raw_legs)
+    if not legs:
+        raise ValueError("signal must include at least one execution leg")
     for leg in legs:
         validate_trade_side(leg.get("side"))
     estimated_cost = float(enriched.get("estimated_cost", 0.0)) or sum(

@@ -33,6 +33,21 @@ def test_scoring_fails_closed_even_when_cost_is_precomputed() -> None:
         )
 
 
+def test_scoring_rejects_empty_execution_legs() -> None:
+    with pytest.raises(ValueError, match="execution leg"):
+        score_signal({"gross_edge": 10.0, "estimated_cost": 0.0, "legs": []})
+
+
+def test_scoring_rejects_missing_execution_legs() -> None:
+    with pytest.raises(ValueError, match="execution leg"):
+        score_signal({"gross_edge": 10.0})
+
+
+def test_precomputed_cost_does_not_bypass_execution_leg_validation() -> None:
+    with pytest.raises(ValueError, match="execution leg"):
+        score_signal({"gross_edge": 10.0, "estimated_cost": 1.0})
+
+
 def test_round_trip_long_and_short_accounting() -> None:
     cfg = CostConfig(option_fee_per_contract=0.0, slippage_bps=0.0)
     long_result = round_trip_option_pnl(
