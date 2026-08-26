@@ -59,6 +59,5 @@ jobs:
         run: python -m build
       - name: Offline CLI smoke test
         run: python -m heston_arb_lab.cli demo
-      - name: Ensure generated artefacts are ignored and tracked tree is unchanged
-        shell: bash
-        run: test -z "$(git status --short --untracked-files=all)"
+      - name: Ensure tracked tree is unchanged
+        run: git diff --exit-code
