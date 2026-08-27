@@ -27,11 +27,12 @@ per-strike implied volatility.
 ## Permanent public/private boundary
 
 The repository does not contain raw or processed quote rows, individual option contracts,
-symbols or actual strikes from the observation grid, NBBO observations, bid/ask values or sizes,
-API payloads, response caches, Parquet files, databases, per-strike market/model IV or fitted
-values, ranked candidates, detailed case studies, trade-level conclusions, secrets, credentials,
-private reports, or a downloadable market dataset. Nothing published here permits reconstruction
-of the underlying market observations.
+individual option-contract identifiers or contract-level symbols, actual strikes from the
+observation grid, NBBO observations, bid/ask values or sizes, API payloads, response caches,
+Parquet files, databases, per-strike market/model IV or fitted values, ranked candidates, detailed
+case studies, trade-level conclusions, secrets, credentials, private reports, or a downloadable
+market dataset. Nothing published here permits reconstruction of the underlying market
+observations.
 
 Reproducing any real-data pathway requires the reader's own authorization and is outside the
 public evidence, demo and CI. The synthetic evidence path remains independent and offline.

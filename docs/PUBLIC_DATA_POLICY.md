@@ -9,7 +9,8 @@ specific written publication permission for the TSLA options study from 30 June 
 
 - any provider-derived artifact outside the exact approved aggregate allowlist;
 - raw or processed quote rows, cached responses and provider exports;
-- individual contracts, symbols, actual strikes, NBBO, bid/ask values or sizes;
+- individual contracts, individual option-contract identifiers or contract-level symbols, actual
+  strikes, NBBO, bid/ask values or sizes;
 - per-strike IV or fitted values, ranked candidates and detailed case studies;
 - API payloads, Parquet files, databases and downloadable market datasets;
 - credentials, API keys and local secret files; and
@@ -21,11 +22,13 @@ reconstruct, approximate or target any private study.
 ## Enforcement
 
 The default dependency set contains no provider client. The synthetic evidence command, tests and
-CI require no credential and issue no provider request. A fail-closed publication guard verifies
-the exact paths and SHA-256 hashes of the approved PNG/CSV artifacts, rejects additional files in
-their directory, checks attribution and disclaimer wording, rejects prohibited data/report
-formats elsewhere, and scans tracked text for secrets and private identifiers. CI regenerates the
-synthetic JSON and SVG and requires a clean diff.
+CI require no credential and issue no provider request. A fail-closed, defense-in-depth publication
+guard verifies the exact paths and SHA-256 hashes of all files in the approved directory, rejects
+additional files there, checks attribution and disclaimer wording, rejects prohibited data/report
+formats elsewhere, and scans tracked text and `HEAD` history for secrets and private identifiers.
+The guard does not replace human review of the diff against the approved Theta Data package and
+does not provide an absolute legal guarantee. CI regenerates the synthetic JSON and SVG and
+requires a clean diff.
 
 The optional provider adapter is code only. It defaults to dry-run behavior and remains outside
 the public evidence path. The narrow permission covering the approved aggregates grants no

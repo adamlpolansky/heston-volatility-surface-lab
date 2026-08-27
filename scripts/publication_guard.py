@@ -1,4 +1,9 @@
-"""Fail closed when the tracked publication boundary contains disallowed material."""
+"""Defense-in-depth checks for the tracked publication boundary and ``HEAD`` history.
+
+This guard fails closed on known publication hazards. It complements, but cannot replace, a
+human review of the diff against the approved Theta Data package and is not an absolute legal
+guarantee.
+"""
 
 from __future__ import annotations
 
@@ -6,7 +11,7 @@ import hashlib
 import os
 import re
 import subprocess
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parents[1]
 ROOT_FILES = {
@@ -62,11 +67,16 @@ APPROVED_ARTIFACT_HASHES = {
         "9902ced307b972d4aa4d8d1b863abea5f3750167c9c01fdae173904584e727b7"
     ),
 }
-APPROVED_MARKDOWN = {
-    f"{APPROVED_DIRECTORY}/08_data_provenance_and_public_private_boundary.md",
-    f"{APPROVED_DIRECTORY}/README.md",
+APPROVED_MARKDOWN_HASHES = {
+    f"{APPROVED_DIRECTORY}/08_data_provenance_and_public_private_boundary.md": (
+        "8ba31393d366d900c3ada487d3702ecfe80403b09d09b99b9b00e6c67f90f175"
+    ),
+    f"{APPROVED_DIRECTORY}/README.md": (
+        "7d5cf0105dd3e6be2e53b0944b23211d489244618e64e0ec0046c3586bfdbaf5"
+    ),
 }
-APPROVED_FILES = set(APPROVED_ARTIFACT_HASHES) | APPROVED_MARKDOWN
+APPROVED_FILE_HASHES = APPROVED_ARTIFACT_HASHES | APPROVED_MARKDOWN_HASHES
+APPROVED_FILES = set(APPROVED_FILE_HASHES)
 ATTRIBUTION = "Options market data provided by Theta Data (https://www.thetadata.net)."
 DISCLAIMER = (
     "This project is independent research by the author and is not reviewed, endorsed or "
@@ -101,10 +111,12 @@ ATTRIBUTED_REFERENCES = {
 DISCLAIMER_FILES = {
     "README.md",
     f"{APPROVED_DIRECTORY}/08_data_provenance_and_public_private_boundary.md",
+    f"{APPROVED_DIRECTORY}/README.md",
 }
 CARVE_OUT_FILES = {
     "README.md",
     f"{APPROVED_DIRECTORY}/08_data_provenance_and_public_private_boundary.md",
+    f"{APPROVED_DIRECTORY}/README.md",
 }
 CARVE_OUT_MARKERS = (
     "not offered under the MIT License",
@@ -120,7 +132,64 @@ APPROVED_STUDY_TEXT_FILES = {
     "scripts/publication_guard.py",
 }
 APPROVED_STUDY_TOKENS = {"tsla", "2026-06-30", "2026-07-02"}
-PYTHON_PREFIXES = ("src/heston_arb_lab/", "tests/")
+PYTHON_FILES = {
+    "src/heston_arb_lab/__init__.py",
+    "src/heston_arb_lab/backtest/__init__.py",
+    "src/heston_arb_lab/backtest/costs.py",
+    "src/heston_arb_lab/backtest/engine.py",
+    "src/heston_arb_lab/backtest/execution.py",
+    "src/heston_arb_lab/backtest/hedging.py",
+    "src/heston_arb_lab/backtest/metrics.py",
+    "src/heston_arb_lab/cli.py",
+    "src/heston_arb_lab/config.py",
+    "src/heston_arb_lab/data/__init__.py",
+    "src/heston_arb_lab/data/contract_filters.py",
+    "src/heston_arb_lab/data/quality.py",
+    "src/heston_arb_lab/data/schemas.py",
+    "src/heston_arb_lab/data/storage.py",
+    "src/heston_arb_lab/data/thetadata_client.py",
+    "src/heston_arb_lab/logging_utils.py",
+    "src/heston_arb_lab/models/__init__.py",
+    "src/heston_arb_lab/models/black_scholes.py",
+    "src/heston_arb_lab/models/calibration.py",
+    "src/heston_arb_lab/models/greeks.py",
+    "src/heston_arb_lab/models/heston_cf.py",
+    "src/heston_arb_lab/models/heston_pricer.py",
+    "src/heston_arb_lab/models/ssvi.py",
+    "src/heston_arb_lab/signals/__init__.py",
+    "src/heston_arb_lab/signals/butterflies.py",
+    "src/heston_arb_lab/signals/calendars.py",
+    "src/heston_arb_lab/signals/model_residuals.py",
+    "src/heston_arb_lab/signals/parity.py",
+    "src/heston_arb_lab/signals/ranking.py",
+    "src/heston_arb_lab/signals/verticals.py",
+    "src/heston_arb_lab/surface/__init__.py",
+    "src/heston_arb_lab/surface/cleaning.py",
+    "src/heston_arb_lab/surface/forwards.py",
+    "src/heston_arb_lab/surface/implied_vol.py",
+    "src/heston_arb_lab/surface/interpolation.py",
+    "src/heston_arb_lab/surface/no_arbitrage.py",
+    "src/heston_arb_lab/surface/surface_builder.py",
+    "src/heston_arb_lab/synthetic_evidence.py",
+    "src/heston_arb_lab/utils/__init__.py",
+    "src/heston_arb_lab/utils/dates.py",
+    "src/heston_arb_lab/utils/math.py",
+    "src/heston_arb_lab/utils/validation.py",
+    "tests/conftest.py",
+    "tests/test_backtest_engine.py",
+    "tests/test_black_scholes.py",
+    "tests/test_cli.py",
+    "tests/test_config.py",
+    "tests/test_contract_filters.py",
+    "tests/test_data_contracts.py",
+    "tests/test_heston_pricer.py",
+    "tests/test_publication_guard.py",
+    "tests/test_signals.py",
+    "tests/test_ssvi.py",
+    "tests/test_surface_no_arbitrage.py",
+    "tests/test_synthetic_evidence.py",
+    "tests/test_thetadata_adapter.py",
+}
 FORBIDDEN_SUFFIXES = {
     ".7z",
     ".arrow",
@@ -196,28 +265,65 @@ SECRET_PATTERNS = {
 }
 
 
-def _candidate_files() -> list[Path]:
+def _git_command(root: Path, *args: str) -> list[str]:
+    return ["git", "-c", f"safe.directory={root.resolve()}", *args]
+
+
+def _candidate_files(root: Path = ROOT) -> list[Path]:
     tracked = subprocess.run(
-        ["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"],
-        cwd=ROOT,
+        _git_command(root, "ls-files", "-z", "--cached", "--others", "--exclude-standard"),
+        cwd=root,
         check=False,
         capture_output=True,
     )
     if tracked.returncode != 0:
         detail = tracked.stderr.decode("utf-8", errors="replace").strip()
         raise SystemExit(f"publication guard could not enumerate Git files: {detail}")
-    return sorted(ROOT / item.decode("utf-8") for item in tracked.stdout.split(b"\0") if item)
+    return sorted(root / item.decode("utf-8") for item in tracked.stdout.split(b"\0") if item)
 
 
 def _is_allowlisted(relative: str) -> bool:
-    if (
+    return (
         relative in ROOT_FILES
         or relative in EXACT_FILES
         or relative in SYNTHETIC_ARTIFACTS
         or relative in APPROVED_FILES
-    ):
+        or relative in PYTHON_FILES
+    )
+
+
+def _is_symlink(path: Path) -> bool:
+    """Keep symlink detection injectable for platform-independent adversarial tests."""
+
+    return path.is_symlink()
+
+
+def _has_forbidden_path_part(relative: str) -> bool:
+    parts = tuple(part.casefold() for part in PurePosixPath(relative).parts)
+    for index, part in enumerate(parts):
+        if part not in FORBIDDEN_PARTS:
+            continue
+        if part == "data" and parts[: index + 1] == ("src", "heston_arb_lab", "data"):
+            continue
         return True
-    return relative.endswith(".py") and relative.startswith(PYTHON_PREFIXES)
+    return False
+
+
+def _path_policy_failures(relative: str) -> list[str]:
+    failures: list[str] = []
+    lower_name = PurePosixPath(relative).name.casefold()
+    suffix = PurePosixPath(relative).suffix.casefold()
+    if not _is_allowlisted(relative):
+        failures.append("outside allowlist")
+    if (
+        suffix in FORBIDDEN_SUFFIXES
+        and relative not in SYNTHETIC_ARTIFACTS
+        and relative not in APPROVED_ARTIFACT_HASHES
+    ) or _has_forbidden_path_part(relative):
+        failures.append("forbidden path type")
+    if any(fragment in lower_name for fragment in FORBIDDEN_NAME_FRAGMENTS):
+        failures.append("internal filename")
+    return failures
 
 
 def _has_adjacent_attribution(text: str, reference: str) -> bool:
@@ -242,20 +348,23 @@ def approved_publication_failures(root: Path) -> list[str]:
     observed = {
         path.relative_to(root).as_posix()
         for path in approved_root.rglob("*")
-        if path.is_file() or path.is_symlink()
+        if not path.is_dir() or _is_symlink(path)
     }
     for relative in sorted(APPROVED_FILES - observed):
         failures.append(f"missing approved file: {relative}")
     for relative in sorted(observed - APPROVED_FILES):
         failures.append(f"unexpected file in approved directory: {relative}")
 
-    for relative, expected_hash in APPROVED_ARTIFACT_HASHES.items():
+    for relative, expected_hash in APPROVED_FILE_HASHES.items():
         path = root / relative
-        if not path.is_file() or path.is_symlink():
+        if _is_symlink(path):
+            failures.append(f"approved file is a symlink: {relative}")
+            continue
+        if not path.is_file():
             continue
         actual_hash = hashlib.sha256(path.read_bytes()).hexdigest()
         if actual_hash != expected_hash:
-            failures.append(f"approved artifact hash drift: {relative}")
+            failures.append(f"approved file hash drift: {relative}")
 
     publication_documents = set(ATTRIBUTED_REFERENCES) | DISCLAIMER_FILES | CARVE_OUT_FILES
     for relative in sorted(publication_documents):
@@ -278,6 +387,11 @@ def approved_publication_failures(root: Path) -> list[str]:
             for marker in CARVE_OUT_MARKERS:
                 if marker not in normalized_text:
                     failures.append(f"missing licence carve-out in {relative}: {marker}")
+        allowed_candidates = (
+            APPROVED_STUDY_TOKENS if relative in APPROVED_STUDY_TEXT_FILES else None
+        )
+        if _contains_forbidden_digest(text, allowed_candidates):
+            failures.append(f"private-study identifier or outcome: {relative}")
     return failures
 
 
@@ -308,27 +422,120 @@ def _local_machine_reference(text: str) -> bool:
     )
 
 
+def _historical_blob_failures(root: Path, relative: str, object_id: str) -> list[str]:
+    """Scan one allowlisted historical text blob without touching disallowed data paths."""
+
+    if relative in APPROVED_ARTIFACT_HASHES:
+        return []
+    blob = subprocess.run(
+        _git_command(root, "cat-file", "blob", object_id),
+        cwd=root,
+        check=False,
+        capture_output=True,
+    )
+    if blob.returncode != 0:
+        detail = blob.stderr.decode("utf-8", errors="replace").strip()
+        return [f"could not inspect historical blob {object_id}: {detail}"]
+    data = blob.stdout
+    if len(data) > 512_000:
+        return [f"historical unexpected large file: {relative}"]
+    if b"\0" in data:
+        return [f"historical unexpected binary file: {relative}"]
+    try:
+        text = data.decode("utf-8")
+    except UnicodeDecodeError:
+        return [f"historical non-UTF-8 file: {relative}"]
+
+    failures: list[str] = []
+    if relative in SYNTHETIC_ARTIFACTS and "SYNTHETIC" not in text:
+        failures.append(f"historical unlabelled synthetic artifact: {relative}")
+    for label, pattern in SECRET_PATTERNS.items():
+        if pattern.search(data):
+            failures.append(f"historical {label}: {relative}")
+    if EMAIL.search(text):
+        failures.append(f"historical email address: {relative}")
+    if _local_machine_reference(text):
+        failures.append(f"historical local machine reference: {relative}")
+    allowed_candidates = APPROVED_STUDY_TOKENS if relative in APPROVED_STUDY_TEXT_FILES else None
+    if _contains_forbidden_digest(text, allowed_candidates):
+        failures.append(f"historical private-study identifier or outcome: {relative}")
+    return failures
+
+
+def history_failures(root: Path) -> list[str]:
+    """Inspect only commits reachable from the repository's current ``HEAD``."""
+
+    revisions = subprocess.run(
+        _git_command(root, "rev-list", "HEAD"),
+        cwd=root,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    )
+    if revisions.returncode != 0:
+        detail = revisions.stderr.strip()
+        return [f"could not enumerate history reachable from HEAD: {detail}"]
+
+    failures: list[str] = []
+    inspected: set[tuple[str, str, str]] = set()
+    for commit in revisions.stdout.splitlines():
+        tree = subprocess.run(
+            _git_command(root, "ls-tree", "-r", "-z", "--full-tree", commit),
+            cwd=root,
+            check=False,
+            capture_output=True,
+        )
+        if tree.returncode != 0:
+            detail = tree.stderr.decode("utf-8", errors="replace").strip()
+            failures.append(f"could not inspect tree {commit}: {detail}")
+            continue
+        for entry in tree.stdout.split(b"\0"):
+            if not entry:
+                continue
+            try:
+                metadata, encoded_path = entry.split(b"\t", 1)
+                mode, object_type, object_id = metadata.decode("ascii").split()
+                relative = encoded_path.decode("utf-8")
+            except (UnicodeDecodeError, ValueError):
+                failures.append(f"unparseable historical tree entry reachable from {commit}")
+                continue
+            identity = (mode, object_id, relative)
+            if identity in inspected:
+                continue
+            inspected.add(identity)
+            if mode == "120000":
+                failures.append(f"historical symlink: {relative}")
+                continue
+            path_failures = _path_policy_failures(relative)
+            if path_failures:
+                failures.extend(
+                    f"historical {failure}: {relative} (reachable from HEAD)"
+                    for failure in path_failures
+                )
+                continue
+            if object_type != "blob":
+                failures.append(f"historical non-blob entry: {relative}")
+                continue
+            failures.extend(_historical_blob_failures(root, relative, object_id))
+    return failures
+
+
 def main() -> None:
     failures = approved_publication_failures(ROOT)
+    failures.extend(history_failures(ROOT))
     files = _candidate_files()
     total_size = 0
     largest = (0, "")
     for path in files:
         relative = path.relative_to(ROOT).as_posix()
-        top_level = path.relative_to(ROOT).parts[0]
-        lower_name = path.name.casefold()
-        if not _is_allowlisted(relative):
-            failures.append(f"outside allowlist: {relative}")
-        if path.is_symlink():
+        path_failures = _path_policy_failures(relative)
+        failures.extend(f"{failure}: {relative}" for failure in path_failures)
+        if _is_symlink(path):
             failures.append(f"symlink: {relative}")
-        if (
-            path.suffix.casefold() in FORBIDDEN_SUFFIXES
-            and relative not in SYNTHETIC_ARTIFACTS
-            and relative not in APPROVED_ARTIFACT_HASHES
-        ) or top_level in FORBIDDEN_PARTS:
-            failures.append(f"forbidden path type: {relative}")
-        if any(fragment in lower_name for fragment in FORBIDDEN_NAME_FRAGMENTS):
-            failures.append(f"internal filename: {relative}")
+            continue
+        if path_failures:
+            continue
         data = path.read_bytes()
         total_size += len(data)
         largest = max(largest, (len(data), relative))
