@@ -1,0 +1,4 @@
+date,symbol,contracts,quote_rows,surface_rows,snapshots,iv_success_pct,forward_residual_before,forward_residual_after,ssvi_iv_rmse,ssvi_tv_rmse,ssvi_warnings,heston_price_rmse,heston_iv_rmse,heston_residual_to_spread,heston_calibrated,heston_failed,heston_skipped,v0_median,theta_median,kappa_median,sigma_median,rho_median,heston_gate,overall_gate
+2026-06-30,TSLA,252,19908,6462,26,99.83,0.545087,0.0861874,0.022293,0.00096539,0,0.749595,0.0259617,2.23543,26,0,0,0.174197,0.483232,5.35999,2,0.0892101,FAIL,FAIL_MODEL_UNSTABLE
+2026-07-01,TSLA,150,11850,3900,26,99.72,0.541865,0.0371492,0.0286409,0.000248784,0,0.362666,0.0134436,1.57774,26,0,0,0.18929,0.101129,3.62685,0.981209,-0.165447,WATCH,WATCH_NEEDS_MORE_DATA
+2026-07-02,TSLA,252,19908,6552,26,100.00,0.738584,0.0787258,0.0187437,0.00079433,0,0.744262,0.0270154,2.40471,26,0,0,0.20976,0.262523,4.72229,0.170041,-0.257418,FAIL,FAIL_MODEL_UNSTABLE

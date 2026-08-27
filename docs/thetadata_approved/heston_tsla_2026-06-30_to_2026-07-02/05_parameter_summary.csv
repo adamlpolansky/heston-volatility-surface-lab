@@ -1,0 +1,27 @@
+model,parameter,min,median,max
+Heston,v0,0.197086,0.216636,0.234082
+Heston,theta,0.005,0.005,0.0937057
+Heston,kappa,8,8,8
+Heston,sigma,2,2,2
+Heston,rho,-0.767227,0.214373,0.539042
+Heston SSVI-smoothed target,v0,0.195103,0.220593,0.233578
+Heston SSVI-smoothed target,theta,0.005,0.005,0.165646
+Heston SSVI-smoothed target,kappa,1.00964,8,8
+Heston SSVI-smoothed target,sigma,1.88762,2,2
+Heston SSVI-smoothed target,rho,-0.556226,0.0337177,0.481529
+Heston regularized,v0,0.179964,0.18929,0.211398
+Heston regularized,theta,0.0523316,0.101129,0.182935
+Heston regularized,kappa,2.01984,3.62685,6.59351
+Heston regularized,sigma,0.5716,0.981209,1.32666
+Heston regularized,rho,-0.503037,-0.165447,0.160163
+Heston fixed kappa/theta,v0,0.177765,0.184142,0.208293
+Heston fixed kappa/theta,theta,0.178934,0.182583,0.200123
+Heston fixed kappa/theta,kappa,2,2,2
+Heston fixed kappa/theta,sigma,0.001,0.463185,2
+Heston fixed kappa/theta,rho,-0.248899,0.15563,0.754822
+SSVI,rho,-0.00000310239,-0.000000263161,0.00000322178
+SSVI,eta,0.999999,1,1
+SSVI,gamma,0.499996,0.499998,0.500001
+SSVI,theta_min,0.000950323,0.00102705,0.00162442
+SSVI,theta_median,0.00321202,0.00333994,0.00390151
+SSVI,theta_max,0.00521974,0.0054034,0.0058409

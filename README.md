@@ -26,8 +26,9 @@ the same synthetic midpoint perturbation, which cancels exactly in `C - P`. It v
 parity-forward implementation; it is not a claim of statistical estimation accuracy on noisy
 market data.
 
-> **SYNTHETIC ONLY. No market-data evidence, provider-derived output, empirical performance,
-> mispricing, profitability or executable-trading claim is included.**
+> **DETERMINISTIC SYNTHETIC DEMO.** The evidence above contains no market data or
+> provider-derived output. A separately isolated, permissioned aggregate case study is
+> documented below. Neither evidence track makes a profitability or executable-trading claim.
 
 [![CI](https://github.com/adamlpolansky/heston-volatility-surface-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/adamlpolansky/heston-volatility-surface-lab/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -84,13 +85,66 @@ The regeneration command rewrites only the labelled aggregate
 [`synthetic_evidence.svg`](docs/assets/synthetic_evidence.svg). CI regenerates them and fails
 if bytes differ. The demo, test suite and CI make no provider request and require no credential.
 
+## Approved aggregate real-data evidence
+
+A separately isolated case study contains only the frozen, permissioned aggregate Heston/SSVI
+outputs for TSLA options from 30 June through 2 July 2026. It contains no raw or processed quote
+rows, individual contracts, actual strikes, NBBO observations, bid/ask values or sizes, API
+responses, caches, per-strike IV or fitted values, ranked candidates, or detailed trade cases.
+
+Options market data provided by Theta Data (https://www.thetadata.net).
+
+This project is independent research by the author and is not reviewed, endorsed or sponsored by Theta Data.
+
+### Normalized regularized-Heston model surface
+
+![Theta Data-derived normalized regularized-Heston model surface](docs/thetadata_approved/heston_tsla_2026-06-30_to_2026-07-02/01_normalized_heston_model_surface.png)
+
+Options market data provided by Theta Data (https://www.thetadata.net).
+
+This figure is constructed from the five published aggregate median parameters using normalized
+`F=100`, log-moneyness and a stable 2–12 DTE grid. It does not contain the observed option grid,
+actual strikes, contracts, quotes or per-strike implied volatility.
+
+### Aggregate out-of-time diagnostics
+
+![Theta Data-derived aggregate out-of-time diagnostics](docs/thetadata_approved/heston_tsla_2026-06-30_to_2026-07-02/02_aggregate_oot_diagnostics.png)
+
+Options market data provided by Theta Data (https://www.thetadata.net).
+
+### Approved aggregate tables
+
+[`03_oot_aggregate_table.csv`](docs/thetadata_approved/heston_tsla_2026-06-30_to_2026-07-02/03_oot_aggregate_table.csv)
+
+Options market data provided by Theta Data (https://www.thetadata.net).
+
+[`04_model_comparison_table.csv`](docs/thetadata_approved/heston_tsla_2026-06-30_to_2026-07-02/04_model_comparison_table.csv)
+
+Options market data provided by Theta Data (https://www.thetadata.net).
+
+[`05_parameter_summary.csv`](docs/thetadata_approved/heston_tsla_2026-06-30_to_2026-07-02/05_parameter_summary.csv)
+
+Options market data provided by Theta Data (https://www.thetadata.net).
+
+[`06_acceptance_gate.csv`](docs/thetadata_approved/heston_tsla_2026-06-30_to_2026-07-02/06_acceptance_gate.csv)
+
+Options market data provided by Theta Data (https://www.thetadata.net).
+
+[`07_audit_summary.csv`](docs/thetadata_approved/heston_tsla_2026-06-30_to_2026-07-02/07_audit_summary.csv)
+
+Options market data provided by Theta Data (https://www.thetadata.net).
+
+See the [approved evidence index](docs/thetadata_approved/heston_tsla_2026-06-30_to_2026-07-02/README.md)
+and [data provenance and public/private boundary](docs/thetadata_approved/heston_tsla_2026-06-30_to_2026-07-02/08_data_provenance_and_public_private_boundary.md).
+
 ## Public boundary
 
-No ThetaData or other restricted-provider data is used. No private single-name study, quote
-row, cached response, fitted real-data parameter, metric, plot, table or conclusion is
-published. The optional adapter remains an inert code interface: it is excluded from the
-default dependency set, defaults to dry-run behavior, and is not exercised by the public
-evidence command.
+The reproducible software-validation path remains entirely synthetic and provider-independent.
+The only provider-derived materials are the exact frozen aggregate artifacts in the isolated
+approved-evidence directory above. No raw or processed rows, individual contracts, actual
+strikes, NBBO, bid/ask observations, API responses, cache, per-strike observations or
+downloadable market dataset is published. The optional adapter remains outside the public demo
+and CI paths, which issue no provider request and require no credential.
 
 See the [public-data policy](docs/PUBLIC_DATA_POLICY.md), [methodology](docs/METHODOLOGY.md),
 [limitations](docs/LIMITATIONS.md), [architecture](docs/ARCHITECTURE.md), and
@@ -98,6 +152,10 @@ See the [public-data policy](docs/PUBLIC_DATA_POLICY.md), [methodology](docs/MET
 
 ## License and author
 
-Original project content is licensed under the [MIT License](LICENSE), copyright 2026
-Adam Luboš Polanský. Provider services, client libraries and market data remain subject to
-their respective terms and licences; none of their data is distributed here.
+The [MIT License](LICENSE) applies to the author's source code and materials explicitly labelled
+synthetic, copyright 2026 Adam Luboš Polanský. The approved Theta Data-derived aggregate
+artifacts are not offered under the MIT License. Their publication relies on personal,
+non-commercial and non-transferable written permission granted to Adam Luboš Polanský for this
+specific study. No right is granted to third parties to sublicense or redistribute those
+provider-derived artifacts. The approved aggregates may remain public after the subscription
+ends, while all permanent exclusions stated above continue to apply.

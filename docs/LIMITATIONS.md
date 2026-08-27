@@ -1,7 +1,8 @@
 # Limitations and non-claims
 
-- All committed evidence is synthetic and validates implementation behavior only. It says
-  nothing about real-market fit, stability, performance or capacity.
+- The reproducible software-validation evidence is synthetic and validates implementation
+  behavior only. The separately isolated real-data case study contains only permissioned frozen
+  aggregates and does not expose or reproduce its underlying market observations.
 - Heston and SSVI are modeling choices, not complete descriptions of an option market.
 - SSVI is used as the primary smoother; its sufficient conditions and discrete checks are not a
   universal proof of arbitrage freedom under every interpolation or extrapolation.

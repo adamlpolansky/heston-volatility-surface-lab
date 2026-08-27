@@ -22,8 +22,9 @@ python -m heston_arb_lab.cli demo
 
 The evidence command must reproduce `docs/assets/synthetic_evidence.json` and
 `docs/assets/synthetic_evidence.svg` byte for byte. CI runs it before checking that the tracked
-tree is unchanged. Only aggregate synthetic evidence is versioned; quote rows are generated in
-memory and never written.
+tree is unchanged. Synthetic quote rows are generated in memory and never written. The isolated
+approved real-data aggregates are frozen publication artifacts: they are neither regenerated nor
+used as inputs by the public commands or CI.
 
 Seed, date, generator parameters and Heston structural settings are constants in
 `heston_arb_lab.synthetic_evidence`. No network or credential is used after dependencies are

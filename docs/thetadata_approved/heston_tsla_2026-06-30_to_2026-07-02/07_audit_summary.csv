@@ -1,0 +1,10 @@
+audit,metric,value
+surface-relative valuation audit,rows scanned,3889
+surface-relative valuation audit,rows excluded by filters,18
+surface-relative valuation audit,model-relative candidates,2343
+surface-relative valuation audit,markout,not evaluated
+same-strike parity audit,pairs tested,1950
+same-strike parity audit,excluded or flagged pairs,18
+same-strike parity audit,inside executable bounds,1932
+same-strike parity audit,dislocation candidates,0
+same-strike parity audit,persistent groups,0

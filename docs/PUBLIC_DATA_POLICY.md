@@ -1,13 +1,17 @@
 # Public-data policy
 
-This repository is provider-independent while data licensing permission is unresolved.
+The reproducible software-validation path is provider-independent and entirely synthetic. A
+separate, isolated directory contains only the frozen aggregate Heston/SSVI artifacts covered by
+specific written publication permission for the TSLA options study from 30 June through 2 July
+2026.
 
 ## Excluded from the public repository
 
-- ThetaData or any other restricted-provider market data;
+- any provider-derived artifact outside the exact approved aggregate allowlist;
 - raw or processed quote rows, cached responses and provider exports;
-- private single-name empirical studies or conclusions;
-- provider-derived IV surfaces, calibration parameters, metrics, plots or tables;
+- individual contracts, symbols, actual strikes, NBBO, bid/ask values or sizes;
+- per-strike IV or fitted values, ranked candidates and detailed case studies;
+- API payloads, Parquet files, databases and downloadable market datasets;
 - credentials, API keys and local secret files; and
 - claims of empirical profitability, mispricing or executable arbitrage.
 
@@ -16,10 +20,13 @@ reconstruct, approximate or target any private study.
 
 ## Enforcement
 
-The default dependency set contains no provider client. The public evidence command, tests and
-CI require no credential and issue no provider request. A publication guard allowlists tracked
-paths, rejects data/report formats and scans tracked text for secrets and prohibited private
-identifiers. CI regenerates the aggregate JSON and SVG and requires a clean diff.
+The default dependency set contains no provider client. The synthetic evidence command, tests and
+CI require no credential and issue no provider request. A fail-closed publication guard verifies
+the exact paths and SHA-256 hashes of the approved PNG/CSV artifacts, rejects additional files in
+their directory, checks attribution and disclaimer wording, rejects prohibited data/report
+formats elsewhere, and scans tracked text for secrets and private identifiers. CI regenerates the
+synthetic JSON and SVG and requires a clean diff.
 
-The optional provider adapter is code only. It defaults to dry-run behavior and is outside the
-public evidence path. No permission to access, store or redistribute provider data is implied.
+The optional provider adapter is code only. It defaults to dry-run behavior and remains outside
+the public evidence path. The narrow permission covering the approved aggregates grants no
+provider access and no right for third parties to sublicense or redistribute those artifacts.

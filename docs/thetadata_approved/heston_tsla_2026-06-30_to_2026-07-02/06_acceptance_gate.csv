@@ -1,0 +1,4 @@
+date,forward,surface,ssvi,heston,overall,heston_residual_to_spread,blocking_reasons
+2026-06-30,WATCH,PASS,PASS,FAIL,FAIL_MODEL_UNSTABLE,2.23543,Heston residual-to-spread above fail threshold; Heston boundary or stability warnings remain
+2026-07-01,PASS,PASS,PASS,WATCH,WATCH_NEEDS_MORE_DATA,1.57774,
+2026-07-02,PASS,PASS,PASS,FAIL,FAIL_MODEL_UNSTABLE,2.40471,Heston residual-to-spread above fail threshold; Heston boundary or stability warnings remain

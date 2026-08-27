@@ -1,0 +1,6 @@
+model,rows,price_rmse,iv_rmse,total_variance_rmse,median_abs_residual,median_residual_to_spread
+Heston,3883,1.01699,0.0907879,not available,0.71717,5.40714
+Heston SSVI-smoothed target,3889,0.852182,0.0784132,not available,0.699498,5.4307
+Heston regularized,2324,0.362666,0.0134436,not available,0.28773,1.57774
+Heston fixed kappa/theta,2324,0.374213,0.0138138,not available,0.284,1.62712
+SSVI,3889,not available,0.0419416,0.000445155,0.0139929,not available
