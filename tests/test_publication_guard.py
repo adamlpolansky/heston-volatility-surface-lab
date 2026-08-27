@@ -204,6 +204,65 @@ def test_python_allowlist_keeps_existing_data_module() -> None:
     assert publication_guard._path_policy_failures("src/heston_arb_lab/data/storage.py") == []
 
 
+def _write_gitattributes(root: Path, *lines: str) -> None:
+    (root / ".gitattributes").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def test_exact_approved_gitattributes_line_passes(tmp_path: Path) -> None:
+    _write_gitattributes(tmp_path, publication_guard.APPROVED_GITATTRIBUTES_LINE)
+
+    assert publication_guard._current_gitattributes_failures(tmp_path) == []
+    assert not publication_guard._contains_forbidden_digest_for_path(
+        ".gitattributes",
+        publication_guard.APPROVED_GITATTRIBUTES_LINE,
+    )
+
+
+def test_missing_approved_gitattributes_line_fails(tmp_path: Path) -> None:
+    _write_gitattributes(tmp_path, "* text=auto eol=lf")
+
+    assert publication_guard._current_gitattributes_failures(tmp_path)
+
+
+def test_duplicate_approved_gitattributes_line_fails(tmp_path: Path) -> None:
+    line = publication_guard.APPROVED_GITATTRIBUTES_LINE
+    _write_gitattributes(tmp_path, line, line)
+
+    assert publication_guard._current_gitattributes_failures(tmp_path)
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        f"{publication_guard.APPROVED_GITATTRIBUTES_LINE} # trailing comment",
+        publication_guard.APPROVED_GITATTRIBUTES_LINE.replace("/* -text", "/nested/* -text"),
+    ],
+)
+def test_modified_approved_gitattributes_line_fails(tmp_path: Path, line: str) -> None:
+    _write_gitattributes(tmp_path, line)
+
+    assert publication_guard._current_gitattributes_failures(tmp_path)
+    assert publication_guard._contains_forbidden_digest_for_path(".gitattributes", line)
+
+
+def test_approved_gitattributes_text_in_another_path_fails() -> None:
+    assert publication_guard._contains_forbidden_digest_for_path(
+        ".gitignore",
+        publication_guard.APPROVED_GITATTRIBUTES_LINE,
+    )
+
+
+def test_approved_gitattributes_line_does_not_hide_another_study_token() -> None:
+    protected_token = next(
+        token
+        for token in publication_guard.APPROVED_STUDY_TOKENS
+        if token in publication_guard.APPROVED_GITATTRIBUTES_LINE.casefold()
+    )
+    text = f"{publication_guard.APPROVED_GITATTRIBUTES_LINE}\n{protected_token}\n"
+
+    assert publication_guard._contains_forbidden_digest_for_path(".gitattributes", text)
+
+
 def _git(repo: Path, *args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         ["git", "-c", f"safe.directory={repo.resolve()}", *args],
@@ -257,6 +316,39 @@ def test_history_ignores_unrelated_branch_outside_head(tmp_path: Path) -> None:
     _git(repo, "switch", "review-head")
 
     assert publication_guard.history_failures(repo) == []
+
+
+def test_history_accepts_exact_approved_gitattributes_line(tmp_path: Path) -> None:
+    repo = _synthetic_git_repository(tmp_path)
+    _write_gitattributes(repo, publication_guard.APPROVED_GITATTRIBUTES_LINE)
+    _git(repo, "add", ".gitattributes")
+    _git(repo, "commit", "-m", "add synthetic attributes sentinel")
+
+    assert publication_guard.history_failures(repo) == []
+
+
+@pytest.mark.parametrize("include_additional_token", [False, True])
+def test_history_rejects_non_exact_approved_gitattributes_content(
+    tmp_path: Path, include_additional_token: bool
+) -> None:
+    repo = _synthetic_git_repository(tmp_path)
+    protected_token = next(
+        token
+        for token in publication_guard.APPROVED_STUDY_TOKENS
+        if token in publication_guard.APPROVED_GITATTRIBUTES_LINE.casefold()
+    )
+    lines = [publication_guard.APPROVED_GITATTRIBUTES_LINE]
+    if include_additional_token:
+        lines.append(protected_token)
+    else:
+        lines[0] += " # trailing comment"
+    _write_gitattributes(repo, *lines)
+    _git(repo, "add", ".gitattributes")
+    _git(repo, "commit", "-m", "add non-exact synthetic attributes sentinel")
+
+    failures = publication_guard.history_failures(repo)
+
+    assert any("historical private-study identifier or outcome" in failure for failure in failures)
 
 
 def test_provider_adapter_defaults_to_dry_run() -> None:

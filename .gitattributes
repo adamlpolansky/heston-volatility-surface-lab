@@ -3,3 +3,4 @@
 *.bat text eol=crlf
 *.cmd text eol=crlf
 *.ps1 text eol=crlf
+docs/thetadata_approved/heston_tsla_2026-06-30_to_2026-07-02/* -text

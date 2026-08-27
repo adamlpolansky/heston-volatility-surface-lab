@@ -44,6 +44,7 @@ SYNTHETIC_ARTIFACTS = {
     "docs/assets/synthetic_evidence.svg",
 }
 APPROVED_DIRECTORY = "docs/thetadata_approved/heston_tsla_2026-06-30_to_2026-07-02"
+APPROVED_GITATTRIBUTES_LINE = f"{APPROVED_DIRECTORY}/* -text"
 APPROVED_ARTIFACT_HASHES = {
     f"{APPROVED_DIRECTORY}/01_normalized_heston_model_surface.png": (
         "1d42d9debfcb289d1b70240ccf447b8d1e500ea97d0e9a6fcc6d0f5ca92605f0"
@@ -390,7 +391,7 @@ def approved_publication_failures(root: Path) -> list[str]:
         allowed_candidates = (
             APPROVED_STUDY_TOKENS if relative in APPROVED_STUDY_TEXT_FILES else None
         )
-        if _contains_forbidden_digest(text, allowed_candidates):
+        if _contains_forbidden_digest_for_path(relative, text, allowed_candidates):
             failures.append(f"private-study identifier or outcome: {relative}")
     return failures
 
@@ -407,6 +408,32 @@ def _contains_forbidden_digest(text: str, allowed_candidates: set[str] | None = 
             ):
                 return True
     return False
+
+
+def _contains_forbidden_digest_for_path(
+    relative: str,
+    text: str,
+    allowed_candidates: set[str] | None = None,
+) -> bool:
+    if relative == ".gitattributes":
+        text = "\n".join(
+            "" if line == APPROVED_GITATTRIBUTES_LINE else line for line in text.splitlines()
+        )
+    return _contains_forbidden_digest(text, allowed_candidates)
+
+
+def _current_gitattributes_failures(root: Path) -> list[str]:
+    path = root / ".gitattributes"
+    if not path.is_file() or _is_symlink(path):
+        return ["missing current .gitattributes"]
+    try:
+        text = path.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        return ["non-UTF-8 current .gitattributes"]
+    count = sum(line == APPROVED_GITATTRIBUTES_LINE for line in text.splitlines())
+    if count != 1:
+        return [f"approved .gitattributes line count is {count}, expected exactly 1"]
+    return []
 
 
 def _local_machine_reference(text: str) -> bool:
@@ -457,7 +484,7 @@ def _historical_blob_failures(root: Path, relative: str, object_id: str) -> list
     if _local_machine_reference(text):
         failures.append(f"historical local machine reference: {relative}")
     allowed_candidates = APPROVED_STUDY_TOKENS if relative in APPROVED_STUDY_TEXT_FILES else None
-    if _contains_forbidden_digest(text, allowed_candidates):
+    if _contains_forbidden_digest_for_path(relative, text, allowed_candidates):
         failures.append(f"historical private-study identifier or outcome: {relative}")
     return failures
 
@@ -523,6 +550,7 @@ def history_failures(root: Path) -> list[str]:
 
 def main() -> None:
     failures = approved_publication_failures(ROOT)
+    failures.extend(_current_gitattributes_failures(ROOT))
     failures.extend(history_failures(ROOT))
     files = _candidate_files()
     total_size = 0
@@ -563,7 +591,7 @@ def main() -> None:
         allowed_candidates = (
             APPROVED_STUDY_TOKENS if relative in APPROVED_STUDY_TEXT_FILES else None
         )
-        if _contains_forbidden_digest(text, allowed_candidates):
+        if _contains_forbidden_digest_for_path(relative, text, allowed_candidates):
             failures.append(f"private-study identifier or outcome: {relative}")
 
     if failures:
