@@ -4,6 +4,64 @@ End-to-end options-surface research framework covering quote validation, option-
 forwards, IV inference, SSVI smoothing, Heston calibration and execution-aware arbitrage
 diagnostics.
 
+[![CI](https://github.com/adamlpolansky/heston-volatility-surface-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/adamlpolansky/heston-volatility-surface-lab/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.12](https://img.shields.io/badge/Python-3.12-blue.svg)](pyproject.toml)
+
+> Options market data provided by Theta Data ([https://www.thetadata.net](https://www.thetadata.net)).
+>
+> This project is independent research by the author and is not reviewed, endorsed or sponsored by Theta Data.
+
+## TSLA Heston/SSVI aggregate case study
+
+A separately isolated case study contains only the frozen, permissioned aggregate Heston/SSVI
+outputs for TSLA options from 30 June through 2 July 2026. It contains no raw or processed quote
+rows, individual contracts, actual strikes, NBBO observations, bid/ask values or sizes, API
+responses, caches, per-strike IV or fitted values, ranked candidates, or detailed trade cases.
+
+### Normalized regularized-Heston model surface
+
+![Theta Data-derived normalized regularized-Heston model surface](docs/thetadata_approved/heston_tsla_2026-06-30_to_2026-07-02/01_normalized_heston_model_surface.png)
+
+Options market data provided by Theta Data (https://www.thetadata.net).
+
+This figure is constructed from the five published aggregate median parameters using normalized
+`F=100`, log-moneyness and a stable 2–12 DTE grid. It does not contain the observed option grid,
+actual strikes, contracts, quotes or per-strike implied volatility.
+
+### Aggregate out-of-time diagnostics
+
+![Theta Data-derived aggregate out-of-time diagnostics](docs/thetadata_approved/heston_tsla_2026-06-30_to_2026-07-02/02_aggregate_oot_diagnostics.png)
+
+Options market data provided by Theta Data (https://www.thetadata.net).
+
+### Approved aggregate tables
+
+[`03_oot_aggregate_table.csv`](docs/thetadata_approved/heston_tsla_2026-06-30_to_2026-07-02/03_oot_aggregate_table.csv)
+
+Options market data provided by Theta Data (https://www.thetadata.net).
+
+[`04_model_comparison_table.csv`](docs/thetadata_approved/heston_tsla_2026-06-30_to_2026-07-02/04_model_comparison_table.csv)
+
+Options market data provided by Theta Data (https://www.thetadata.net).
+
+[`05_parameter_summary.csv`](docs/thetadata_approved/heston_tsla_2026-06-30_to_2026-07-02/05_parameter_summary.csv)
+
+Options market data provided by Theta Data (https://www.thetadata.net).
+
+[`06_acceptance_gate.csv`](docs/thetadata_approved/heston_tsla_2026-06-30_to_2026-07-02/06_acceptance_gate.csv)
+
+Options market data provided by Theta Data (https://www.thetadata.net).
+
+[`07_audit_summary.csv`](docs/thetadata_approved/heston_tsla_2026-06-30_to_2026-07-02/07_audit_summary.csv)
+
+Options market data provided by Theta Data (https://www.thetadata.net).
+
+See the [approved evidence index](docs/thetadata_approved/heston_tsla_2026-06-30_to_2026-07-02/README.md)
+and [data provenance and public/private boundary](docs/thetadata_approved/heston_tsla_2026-06-30_to_2026-07-02/08_data_provenance_and_public_private_boundary.md).
+
+## Reproducible synthetic demo
+
 ![SYNTHETIC evidence: fitted SSVI surface and pipeline diagnostics](docs/assets/synthetic_evidence.svg)
 
 ```bash
@@ -28,13 +86,9 @@ market data.
 
 > **DETERMINISTIC SYNTHETIC DEMO.** The evidence above contains no market data or
 > provider-derived output. A separately isolated, permissioned aggregate case study is
-> documented below. Neither evidence track makes a profitability or executable-trading claim.
+> documented above. Neither evidence track makes a profitability or executable-trading claim.
 
-[![CI](https://github.com/adamlpolansky/heston-volatility-surface-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/adamlpolansky/heston-volatility-surface-lab/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Python 3.12](https://img.shields.io/badge/Python-3.12-blue.svg)](pyproject.toml)
-
-## What this demonstrates
+## Methodology
 
 The fixed-seed evidence pack runs one synthetic chain through the complete publication path:
 
@@ -84,58 +138,6 @@ The regeneration command rewrites only the labelled aggregate
 [`synthetic_evidence.json`](docs/assets/synthetic_evidence.json) and
 [`synthetic_evidence.svg`](docs/assets/synthetic_evidence.svg). CI regenerates them and fails
 if bytes differ. The demo, test suite and CI make no provider request and require no credential.
-
-## Approved aggregate real-data evidence
-
-A separately isolated case study contains only the frozen, permissioned aggregate Heston/SSVI
-outputs for TSLA options from 30 June through 2 July 2026. It contains no raw or processed quote
-rows, individual contracts, actual strikes, NBBO observations, bid/ask values or sizes, API
-responses, caches, per-strike IV or fitted values, ranked candidates, or detailed trade cases.
-
-Options market data provided by Theta Data (https://www.thetadata.net).
-
-This project is independent research by the author and is not reviewed, endorsed or sponsored by Theta Data.
-
-### Normalized regularized-Heston model surface
-
-![Theta Data-derived normalized regularized-Heston model surface](docs/thetadata_approved/heston_tsla_2026-06-30_to_2026-07-02/01_normalized_heston_model_surface.png)
-
-Options market data provided by Theta Data (https://www.thetadata.net).
-
-This figure is constructed from the five published aggregate median parameters using normalized
-`F=100`, log-moneyness and a stable 2–12 DTE grid. It does not contain the observed option grid,
-actual strikes, contracts, quotes or per-strike implied volatility.
-
-### Aggregate out-of-time diagnostics
-
-![Theta Data-derived aggregate out-of-time diagnostics](docs/thetadata_approved/heston_tsla_2026-06-30_to_2026-07-02/02_aggregate_oot_diagnostics.png)
-
-Options market data provided by Theta Data (https://www.thetadata.net).
-
-### Approved aggregate tables
-
-[`03_oot_aggregate_table.csv`](docs/thetadata_approved/heston_tsla_2026-06-30_to_2026-07-02/03_oot_aggregate_table.csv)
-
-Options market data provided by Theta Data (https://www.thetadata.net).
-
-[`04_model_comparison_table.csv`](docs/thetadata_approved/heston_tsla_2026-06-30_to_2026-07-02/04_model_comparison_table.csv)
-
-Options market data provided by Theta Data (https://www.thetadata.net).
-
-[`05_parameter_summary.csv`](docs/thetadata_approved/heston_tsla_2026-06-30_to_2026-07-02/05_parameter_summary.csv)
-
-Options market data provided by Theta Data (https://www.thetadata.net).
-
-[`06_acceptance_gate.csv`](docs/thetadata_approved/heston_tsla_2026-06-30_to_2026-07-02/06_acceptance_gate.csv)
-
-Options market data provided by Theta Data (https://www.thetadata.net).
-
-[`07_audit_summary.csv`](docs/thetadata_approved/heston_tsla_2026-06-30_to_2026-07-02/07_audit_summary.csv)
-
-Options market data provided by Theta Data (https://www.thetadata.net).
-
-See the [approved evidence index](docs/thetadata_approved/heston_tsla_2026-06-30_to_2026-07-02/README.md)
-and [data provenance and public/private boundary](docs/thetadata_approved/heston_tsla_2026-06-30_to_2026-07-02/08_data_provenance_and_public_private_boundary.md).
 
 ## Public boundary
 
